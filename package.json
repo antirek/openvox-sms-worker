@@ -1,0 +1,25 @@
+{
+  "name": "openvox-sms-worker",
+  "version": "0.0.1",
+  "description": "Receive from RabbitMQ task for sending via OpenVox SMS Gateway",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antirek/openvox-sms-worker.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/antirek/openvox-sms-worker/issues"
+  },
+  "homepage": "https://github.com/antirek/openvox-sms-worker",
+  "dependencies": {
+    "amqplib": "^0.3.2",
+    "joi": "^6.0.8",
+    "openvox-sms": "0.0.7",
+    "when": "^3.7.2"
+  }
+}
