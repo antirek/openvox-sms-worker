@@ -72,7 +72,7 @@ var Server = function (config) {
                 var handler = new Handler(channel, validator, smsSender);
                 handler.setLogger(logger);
 
-                log(" [*] Waiting for messages. To exit press CTRL+C");
+                log("ready for work");
                 return channel.consume(config['amqp'].queue, handler.handle, {noAck: false});                
             })
             .then(null, console.warn);

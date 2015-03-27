@@ -19,7 +19,7 @@ amqp.connect('amqp://localhost')
         source: 'Locally',
         targetNumber: '89135292926',
         msgText: text,
-        span: 1
+        span: 2
       };
 
       msg = JSON.stringify(msg);
