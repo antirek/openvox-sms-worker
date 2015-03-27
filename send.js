@@ -13,7 +13,19 @@ amqp.connect('amqp://localhost')
       return channel.assertQueue(q, {durable: true}); 
   })
   .then(function () {
-      var msg = process.argv.slice(2).join(' ') || "Hello World!";
+      var text = process.argv.slice(2).join(' ') || "Hello World!";
+
+      var msg = {
+        source1: 'Locally',
+        targetNumber: '89135292926',
+        msgText: text,
+        span: 1
+      };
+
+      msg = JSON.stringify(msg);
+
+      console.log('msg', msg);
+
       channel.sendToQueue(q, new Buffer(msg), {deliveryMode: true});
       console.log(" [x] Sent '%s'", msg);
       return channel.close();
