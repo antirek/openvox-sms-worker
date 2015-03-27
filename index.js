@@ -2,51 +2,82 @@
 
 var amqp = require('amqplib');
 var OpenvoxSMS = require('openvox-sms');
-var openvoxWrapper = require('./lib/openvoxWrapper');
+var Joi = require('joi');
+var when = require('when')
 
 var config = require('./config');
-var amqpConfig = config['amqp'];
-var openvoxConfig = config['openvox-sms'];
-var loggerConfig = config['logger'];
 
-var smsSender = new openvoxWrapper(new OpenvoxSMS(openvoxConfig));
+var openvoxWrapper = require('./lib/openvoxWrapper');
+var Logger = require('./lib/logger');
 var Handler = require('./lib/handler');
 
-var msgFormat = require('./lib/msgFormat');
-var validator = new (require('./lib/validator'))(msgFormat);
 
-var Logger = require('./lib/logger');
-var logger = new Logger(loggerConfig);
+var Server = function (config) {
 
-var log = function (message, object) {
-   if (logger) {
-      logger.info(message, object);
-   } else {
-      console.log(message, object);
-   }
+    var configSchema = require('./lib/configSchema');
+    var smsSender, validator, logger;
+    var connection, channel;
+    
+    var log = function (message, object) {
+       if (logger) {
+          logger.info(message, object);
+       } else {
+          console.log(message, object);
+       }
+    };
+
+    var validate = function (file, schema) {
+        var defer = when.defer();
+        Joi.validate(file, schema, function (err, value){
+            if (err) {
+                defer.reject(err);
+            } else {
+                defer.resolve(value);
+            }
+        });
+        return defer.promise;
+    };
+
+    var init = function () {
+        var msgFormat = require('./lib/msgFormat');
+        validator = new (require('./lib/validator'))(msgFormat);
+        smsSender = new openvoxWrapper(new OpenvoxSMS(config['openvox-sms']));
+        logger = new Logger(config['logger']);
+        return when.resolve(1);
+    };
+
+    this.start = function () {
+
+        validate(config, configSchema)
+            .then(function (validatedConfig) {
+                return init();
+            })
+            .then(function () {
+                return amqp.connect(config['amqp'].url);
+            })
+            .then(function (conn) {
+                log('connection to amqp opened')
+                connection = conn;
+                process.once('SIGINT', function() { connection.close(); });
+                return connection.createChannel()
+            })
+            .then(function (ch) {
+                channel = ch;
+                return channel.assertQueue(config['amqp'].queue, {durable: true});
+            })
+            .then(function() {
+                return channel.prefetch(1); 
+            })
+            .then(function() {
+                var handler = new Handler(channel, validator, smsSender);
+                handler.setLogger(logger);
+
+                log(" [*] Waiting for messages. To exit press CTRL+C");
+                return channel.consume(config['amqp'].queue, handler.handle, {noAck: false});                
+            })
+            .then(null, console.warn);
+    };
 };
 
-var connection, channel;
-
-amqp.connect(amqpConfig.url)
-    .then(function (conn) {
-        log('connection to amqp opened')
-        connection = conn;
-        process.once('SIGINT', function() { connection.close(); });
-        return connection.createChannel()
-    })
-    .then(function (ch) {
-        channel = ch;
-        return channel.assertQueue(amqpConfig.queue, {durable: true});
-    })
-    .then(function() {
-        return channel.prefetch(1); 
-    })
-    .then(function() {
-        var handler = new Handler(channel, validator, smsSender);
-        handler.setLogger(logger);
-
-        channel.consume(amqpConfig.queue, handler.handle, {noAck: false});
-        log(" [*] Waiting for messages. To exit press CTRL+C");
-    })
-    .then(null, console.warn);
+var server = new Server(config);
+server.start();
