@@ -16,7 +16,7 @@ amqp.connect('amqp://localhost')
       var text = process.argv.slice(2).join(' ') || "Hello World!";
 
       var msg = {
-        source1: 'Locally',
+        source: 'Locally',
         targetNumber: '89135292926',
         msgText: text,
         span: 1

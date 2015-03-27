@@ -19,7 +19,9 @@
   "dependencies": {
     "amqplib": "^0.3.2",
     "joi": "^6.0.8",
-    "openvox-sms": "0.0.8",
-    "when": "^3.7.2"
+    "openvox-sms": "0.0.9",
+    "when": "^3.7.2",
+    "winston": "^0.9.0",
+    "winston-syslog": "^1.1.0"
   }
 }
