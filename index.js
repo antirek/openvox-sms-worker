@@ -1,27 +1,38 @@
+
+var config = require('./config');
 var amqp = require('amqplib');
 
-amqp.connect('amqp://localhost').then(function(conn) {
+var amqpConfig = config['amqp'];
+var openvoxConfig = config['openvox-sms'];
+var Handler = require('./lib/handler');
+
+
+var OpenvoxSMS = require('openvox-sms');
+var sms = new OpenvoxSMS({host: '192.168.243.125'});
+
+
+amqp.connect(amqpConfig.url)
+  .then(function (connection) {
   
-  process.once('SIGINT', function() { conn.close(); });
+    process.once('SIGINT', function() { connection.close(); });
 
-  return conn.createChannel().then(function(ch) {
-    var ok = ch.assertQueue('task_queue', {durable: true});
-    ok = ok.then(function() { ch.prefetch(1); });
-    ok = ok.then(function() {
-      ch.consume('task_queue', doWork, {noAck: false});
-      console.log(" [*] Waiting for messages. To exit press CTRL+C");
-    });
-    return ok;
+    return connection.createChannel()
+      .then(function (channel) {
+          var ok = channel.assertQueue(amqpConfig.queue, {durable: true});
 
-    function doWork(msg) {
-      var body = msg.content.toString();
-      console.log(" [x] Received '%s'", body);
-      var secs = body.split('.').length - 1;
-      //console.log(" [x] Task takes %d seconds", secs);
-      setTimeout(function() {
-        console.log(" [x] Done");
-        ch.ack(msg);
-      }, secs * 1000);
-    }
-  });
+          return ok.then(function() { 
+                channel.prefetch(1); 
+            })
+            .then(function() {
+
+              var handler = new Handler(channel, sms, openvoxConfig);
+              //console.log(handler);
+
+              channel.consume(amqpConfig.queue, handler.handle, {noAck: false});
+              
+              console.log(" [*] Waiting for messages. To exit press CTRL+C");
+            });
+
+      });
+
 }).then(null, console.warn);

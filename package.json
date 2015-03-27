@@ -19,7 +19,7 @@
   "dependencies": {
     "amqplib": "^0.3.2",
     "joi": "^6.0.8",
-    "openvox-sms": "0.0.7",
+    "openvox-sms": "0.0.8",
     "when": "^3.7.2"
   }
 }
