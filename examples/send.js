@@ -1,7 +1,7 @@
 var amqp = require('amqplib');
 var when = require('when');
 var channel, connection;
-var q = 'task_queue';
+var queue = 'task_queue';
 
 amqp.connect('amqp://localhost')
   .then(function (conn) {
@@ -10,7 +10,7 @@ amqp.connect('amqp://localhost')
   })
   .then(function (ch) {
       channel = ch;
-      return channel.assertQueue(q, {durable: true}); 
+      return channel.assertQueue(queue, {durable: true}); 
   })
   .then(function () {
       var text = process.argv.slice(2).join(' ') || "Hello World!";
@@ -26,7 +26,7 @@ amqp.connect('amqp://localhost')
 
       console.log('msg', msg);
 
-      channel.sendToQueue(q, new Buffer(msg), {deliveryMode: true});
+      channel.sendToQueue(queue, new Buffer(msg), {deliveryMode: true});
       console.log(" [x] Sent '%s'", msg);
       return channel.close();
   })

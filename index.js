@@ -5,8 +5,6 @@ var OpenvoxSMS = require('openvox-sms');
 var Joi = require('joi');
 var when = require('when')
 
-var config = require('./config');
-
 var openvoxWrapper = require('./lib/openvoxWrapper');
 var Logger = require('./lib/logger');
 var Handler = require('./lib/handler');
@@ -79,5 +77,4 @@ var Server = function (config) {
     };
 };
 
-var server = new Server(config);
-server.start();
+module.exports = Server;
