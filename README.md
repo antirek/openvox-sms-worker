@@ -22,7 +22,7 @@ Step 3. Add code to your **app.js**
 
 `````
 var config = require('./config');
-var OpenvoxSmsWorker = require('./openvox-sms-worker');
+var OpenvoxSmsWorker = require('openvox-sms-worker');
 
 var server = new OpenvoxSmsWorker(config);
 server.start();
@@ -73,10 +73,10 @@ Message for sending via openvox-sms-worker must have format like this
 
 `````
 {
-    span: 1,
-    source: 'From Alaska server',
-    targetNumber: '89135292926',
-    msgText: 'Some text for sending as SMS to my dear friends!'
+    span: 1,   //span module of gsms gateway, default 1, not required
+    source: 'From Alaska server', //define source of message
+    targetNumber: '89135292926',  // or '+79135292926', string format
+    msgText: 'Some text for sending as SMS to my dear friends!'   // short or long sms text
 }
 
 `````
