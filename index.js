@@ -4,11 +4,10 @@ var amqp = require('amqplib');
 var OpenvoxSMS = require('openvox-sms');
 var Joi = require('joi');
 var when = require('when')
-
-var config = require('./config');
+var console = require('tracer').colorConsole();
 
 var openvoxWrapper = require('./lib/openvoxWrapper');
-var Logger = require('./lib/logger');
+
 var Handler = require('./lib/handler');
 
 
@@ -16,15 +15,7 @@ var Server = function (config) {
 
     var configSchema = require('./lib/configSchema');
     var smsSender, validator, logger;
-    var connection, channel;
-    
-    var log = function (message, object) {
-       if (logger) {
-          logger.info(message, object);
-       } else {
-          console.log(message, object);
-       }
-    };
+    var connection, channel;    
 
     var validate = function (file, schema) {
         var defer = when.defer();
@@ -42,7 +33,6 @@ var Server = function (config) {
         var msgFormat = require('./lib/msgFormat');
         validator = new (require('./lib/validator'))(msgFormat);
         smsSender = new openvoxWrapper(new OpenvoxSMS(config['openvox-sms']));
-        logger = new Logger(config['logger']);
         return when.resolve(1);
     };
 
@@ -56,7 +46,7 @@ var Server = function (config) {
                 return amqp.connect(config['amqp'].url);
             })
             .then(function (conn) {
-                log('connection to amqp opened')
+                console.log('connection to amqp opened')
                 connection = conn;
                 process.once('SIGINT', function() { connection.close(); });
                 return connection.createChannel()
@@ -69,15 +59,13 @@ var Server = function (config) {
                 return channel.prefetch(1); 
             })
             .then(function() {
-                var handler = new Handler(channel, validator, smsSender);
-                handler.setLogger(logger);
+                var handler = new Handler(channel, validator, smsSender);                
 
-                log("ready for work");
+                console.log("ready for work");
                 return channel.consume(config['amqp'].queue, handler.handle, {noAck: false});                
             })
-            .then(null, console.warn);
+            .then(null, console.log);
     };
 };
 
-var server = new Server(config);
-server.start();
+module.exports = Server;

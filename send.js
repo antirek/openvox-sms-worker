@@ -1,12 +1,12 @@
 var amqp = require('amqplib');
-var when = require('when');
+//var when = require('when');
 var channel, connection;
-var q = 'task_queue';
+var q = 'sms.queue';
 
-amqp.connect('amqp://localhost')
+amqp.connect('amqp://mq01.mobilon.ru')
   .then(function (conn) {
       connection = conn;
-      return when(conn.createChannel());
+      return conn.createChannel();
   })
   .then(function (ch) {
       channel = ch;
