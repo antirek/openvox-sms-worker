@@ -5,8 +5,8 @@
       "script"      : "./app.js",
       "watch"       : false,
       "env": {
-        "NODE_CONFIG_DIR": "./config",
-        "NODE_ENV": "config",
+        "NODE_CONFIG_DIR": "/etc/beebon/worker/",
+        "NODE_ENV": "sms",
       }
     }
   ]
