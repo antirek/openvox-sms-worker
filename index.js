@@ -1,20 +1,18 @@
 'use strict';
 
 var amqp = require('amqplib');
-var OpenvoxSMS = require('openvox-sms');
 var Joi = require('joi');
 var when = require('when')
 var console = require('tracer').colorConsole();
 
 var openvoxWrapper = require('./lib/openvoxWrapper');
-
 var Handler = require('./lib/handler');
 
 
 var Server = function (config) {
 
     var configSchema = require('./lib/configSchema');
-    var smsSender, validator, logger;
+    var validator, logger;
     var connection, channel;    
 
     var validate = function (file, schema) {
@@ -32,7 +30,7 @@ var Server = function (config) {
     var init = function () {
         var msgFormat = require('./lib/msgFormat');
         validator = new (require('./lib/validator'))(msgFormat);
-        smsSender = new openvoxWrapper(new OpenvoxSMS(config['openvox-sms']));
+        smsSender = new openvoxWrapper(config['openvox-sms']);
         return when.resolve(1);
     };
 
