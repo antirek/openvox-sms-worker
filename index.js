@@ -6,13 +6,14 @@ var when = require('when')
 var console = require('tracer').colorConsole();
 
 var openvoxWrapper = require('./lib/openvoxWrapper');
+
 var Handler = require('./lib/handler');
 
 
 var Server = function (config) {
 
     var configSchema = require('./lib/configSchema');
-    var validator, logger;
+    var smsSender, validator, logger;
     var connection, channel;    
 
     var validate = function (file, schema) {
