@@ -1,7 +1,7 @@
 {
   "apps" : [
     {
-      "name"        : "openvox-sms-worker",
+      "name"        : "beebon-sms-worker",
       "script"      : "./app.js",
       "watch"       : false,
       "env": {
